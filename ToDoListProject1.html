@@ -18,8 +18,10 @@
         <input type="text" placeholder="Type Your Task Here" id="task" Autofocus>
         <input type="date" id="date">
         <input type="time" id="time">
-        <button type="button" id="clearData" onclick=Clear()>Clear Data</button>
+        <button type="button" id="clearData" onclick=Clear()>Clear Fields</button>
         <button type="button" id="submitData" onclick=Add()>Submit Data</button>
+        <button type="button" id="DeleteEverything" onclick=Nuke()>Clear The Whole Board</button>
+
     </section>
     <br>
     <section id=notesArea>
@@ -30,7 +32,34 @@
         var Xclose;
         var index=0;
         var note;
-        var inputArea;
+        var notesArea;
+
+        function Nuke(){
+            notesArea=document.getElementById("notesArea");
+            if (!notesArea.hasChildNodes()){
+                alert ("Your board's empty");
+                document.getElementById("task").focus();
+                return;
+            }
+            else{            
+                if (confirm("Are you sure you wish to clear the whole board?\nAll of your notes will be deleted!")){
+                
+                //delete all notes
+                while (notesArea.firstChild) {
+                notesArea.removeChild(notesArea.firstChild);
+                }
+                //clear localstorage
+                localStorage.clear();
+                alert("The board has been cleared");
+                document.getElementById("task").focus();
+                }
+                else {
+                    return;
+                }
+
+            }
+
+        }
         
         function Clear(){
             document.getElementById("task").value="";
@@ -42,7 +71,7 @@
             if (localStorage.length<1){
                 index=0;
             }
-            if (document.getElementById("task").value===""){
+            if (document.getElementById("task").value==="" || document.getElementById("date").value===""){
                 alert ("You haven't submitted a task, please try again");
                 document.getElementById("task").value="";
                 document.getElementById("date").value="";
@@ -53,40 +82,32 @@
             //create and add note to DOM
             index++;
             note=document.createElement("div");
-            inputArea=document.getElementById("notesArea");
+            notesArea=document.getElementById("notesArea");
             note.id="note";
-            inputArea.appendChild(note);
+            notesArea.appendChild(note);
             note.classList.add('fade');
             note.style.display = "block";
             note.setAttribute ("index",index);
-
-
-
             //text, date and hour capture
             var taskText=document.getElementById("task").value;
             var dateText=document.getElementById("date").value;
             dateText=ReverseDate(dateText);
             var timeText=document.getElementById("time").value;
-
             //assign task to note
             var textArea=document.createElement("div");
             textArea.id="textArea";
             note.appendChild(textArea);
             textArea.innerText=taskText;
-
             //assign date to note
             var dateArea=document.createElement("div");
             dateArea.id="dateArea";
             note.appendChild(dateArea);
             dateArea.innerHTML=dateText;
-
-
             //assign time to note
             var timeArea=document.createElement("div");
             timeArea.id="timeArea";
             note.appendChild(timeArea);
             timeArea.innerHTML=timeText;
-
             //Create close button and object for it
             Xclose=document.createElement("span");
             Xclose.id="X";
@@ -94,19 +115,16 @@
             Xclose.setAttribute ("class", "glyphicon glyphicon-remove");
             note.appendChild(Xclose);
             Xclose.onclick=Delete;
-
             //transfer to local storage using index as the key
             var noteData={taskText,dateText,timeText};
             var JSONnoteData=JSON.stringify(noteData);
             localStorage.setItem(index,JSONnoteData);
-
             //Quality of life additions to make it user friendly
             document.getElementById("task").value="";
             document.getElementById("date").value="";
             document.getElementById("time").value="";
             document.getElementById("task").focus();
         }
-
         function ReverseDate(date){
             date=date.split("-");
             date=date.reverse();
@@ -117,56 +135,48 @@
             
             //identify which X was clicked on
             var source=event.target;
-
             //Local storage removal
             //get the index of that X which acts as the key to the local storage
             var key=source.getAttribute("index");
             //delete local storage entry with above key
             localStorage.removeItem(key);
-
             //deletion of the note itself
             var ParentofSource=source.parentElement;
-            inputArea=document.getElementById("notesArea");
-            inputArea.removeChild(ParentofSource);
+            notesArea=document.getElementById("notesArea");
+            notesArea.removeChild(ParentofSource);
         }
-
-
         //load data from localstorage
-
         window.onload=LoadData;
         
         function LoadData(){
             //a.access localstorage.length to draw all the saved data (key is index)
-            for (var j=1;j<=localStorage.length;j++){
+            if (localStorage.length>0){
+                for (var j=1;j<=localStorage.length;j++){
                 var fetchedNoteData=JSON.parse((localStorage.getItem(j)));
                 //create note for the accessed data inside the notes area with all the needed fade in effects
                 index++;
                 note=document.createElement("div");
-                var inputArea=document.getElementById("notesArea");
+                var notesArea=document.getElementById("notesArea");
                 note.id="note";
-                inputArea.appendChild(note);
+                notesArea.appendChild(note);
                 note.classList.add('fade');
                 note.style.display = "block";
                 note.setAttribute ("index",index);
-
                 //assign task to note
                 var textArea=document.createElement("div");
                 textArea.id="textArea";
                 note.appendChild(textArea);
                 textArea.innerText=fetchedNoteData.taskText;
-
                 //assign date to note
                 var dateArea=document.createElement("div");
                 dateArea.id="dateArea";
                 note.appendChild(dateArea);
                 dateArea.innerHTML=fetchedNoteData.dateText;
-
                 //assign time to note
                 var timeArea=document.createElement("div");
                 timeArea.id="timeArea";
                 note.appendChild(timeArea);
                 timeArea.innerHTML=fetchedNoteData.timeText;
-
                  //Create close button and object for it
                 Xclose=document.createElement("span");
                 Xclose.id="X";
@@ -174,8 +184,14 @@
                 Xclose.setAttribute ("class", "glyphicon glyphicon-remove");
                 note.appendChild(Xclose);
                 Xclose.onclick=Delete;
-
             }
+            }
+            //bug prevention for some notearea child thingy for the Nuke function
+            else {
+                notesArea=document.getElementById("notesArea");
+                notesArea.removeChild(notesArea.firstChild);
+            }
+            
         }
         window.onunload=ReorderLocalStorage;
         var notes=[];
