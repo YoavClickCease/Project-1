@@ -102,13 +102,29 @@ h1{
     color:yellow;
     
 }
+#DeleteEverything{
+    position: absolute;
+    width:200px;
+    height:100px;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    font-weight: bold;
+    color:purple;
+    background-color:teal;
+    right: 70px;
+    bottom:55px;
+    font-size: 17px;
+}
 
+#DeleteEverything:hover{
+    background-color: brown;
+    color:black;
+
+}
 #notesArea {
     height: 475px;
     display:flex;
     flex-wrap:wrap;
-    justify-content: space-around;
-    align-items: center;
+    justify-content: left;
     overflow:auto;
 }
 
@@ -138,7 +154,7 @@ h1{
     color: red;
     cursor: pointer;
 }
-#X:hover{
+#note:hover>#X{
     opacity:1;
 }
 @keyframes fadein {
